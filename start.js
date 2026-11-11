@@ -5,19 +5,33 @@ const path = require("path");
 
 const app = express();
 
+app.set("trust proxy", 1);
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.use(session({
-  secret: process.env.SESSION_SECRET || "lion-master-secret-change-this",
+  secret: process.env.SESSION_SECRET || "CHANGE-THIS-SECRET",
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 24 * 60 * 60 * 1000
+  }
 }));
 
+const initializeMaster = require("./admin/bootstrap");
+const adminRoutes = require("./admin/routes");
+
+initializeMaster();
+
+app.use("/api", adminRoutes);
 app.use(express.static(path.join(__dirname, "public")));
 
 app.get("/", (req, res) => {
-  res.send("BOSS EAGLE BET MASTER PANEL IS RUNNING");
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 const PORT = process.env.PORT || 8080;
