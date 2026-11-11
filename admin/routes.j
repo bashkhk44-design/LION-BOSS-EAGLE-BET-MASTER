@@ -3,6 +3,7 @@ const router = express.Router();
 
 const users = require("./users");
 
+// لوحة المدير الرئيسي
 router.get("/dashboard", (req, res) => {
   res.json({
     success: true,
@@ -16,6 +17,26 @@ router.get("/dashboard", (req, res) => {
       "file-center"
     ]
   });
+});
+
+// إنشاء رئيس وكيل أو وكيل أو كاشير
+router.post("/users", (req, res) => {
+  try {
+    const actor = req.session?.user;
+
+    const user = users.createUser(actor, req.body);
+
+    res.status(201).json({
+      success: true,
+      user
+    });
+
+  } catch (error) {
+    res.status(403).json({
+      success: false,
+      message: error.message
+    });
+  }
 });
 
 module.exports = router;
