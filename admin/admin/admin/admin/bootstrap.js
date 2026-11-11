@@ -20,6 +20,10 @@ function initializeMaster() {
     users = JSON.parse(fs.readFileSync(FILE, "utf8"));
   }
 
+  if (!Array.isArray(users)) {
+    throw new Error("Invalid users database");
+  }
+
   if (users.length > 0) {
     console.log("Accounts already exist");
     return;
@@ -38,7 +42,9 @@ function initializeMaster() {
     createdAt: new Date().toISOString()
   });
 
-  fs.writeFileSync(FILE, JSON.stringify(users, null, 2));
+  fs.writeFileSync(FILE, JSON.stringify(users, null, 2), {
+    mode: 0o600
+  });
 
   console.log("MASTER account initialized");
 }
