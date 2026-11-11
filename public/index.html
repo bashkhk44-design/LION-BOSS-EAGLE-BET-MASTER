@@ -1,0 +1,92 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BOSS EAGLE MASTER</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#090909;color:#eee;font-family:Arial}
+header{background:#17130a;border-bottom:2px solid #c99b35;padding:22px;text-align:center}
+header h1{color:#e6b94e;margin:0}
+header p{color:#aaa}
+nav{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:15px}
+nav button,.card{background:#171717;border:1px solid #8e6b24;color:#e6b94e;padding:17px;border-radius:9px;font-size:15px}
+main{padding:15px}
+h2{color:#e6b94e}
+.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.card{text-align:center}
+.card strong{display:block;font-size:25px;margin-top:12px;color:white}
+section{background:#141414;border:1px solid #333;border-radius:10px;padding:16px;margin:15px 0}
+button{cursor:pointer}
+button:active{background:#3a2b10}
+footer{text-align:center;color:#777;padding:25px}
+</style>
+</head>
+<body>
+<header>
+<h1>👑 BOSS EAGLE BET</h1>
+<p>MASTER CONTROL PANEL</p>
+</header>
+
+<nav>
+<button onclick="show('dashboard')">الرئيسية</button>
+<button onclick="show('tree')">شجرة الوكلاء</button>
+<button onclick="show('players')">اللاعبون</button>
+<button onclick="show('wallet')">إدارة الأرصدة</button>
+<button onclick="show('reports')">التقارير</button>
+<button onclick="show('settings')">الإعدادات</button>
+</nav>
+
+<main>
+<section id="dashboard">
+<h2>لوحة المعلومات الرئيسية</h2>
+<div class="cards">
+<div class="card">SUPER MASTER<strong>0</strong></div>
+<div class="card">MASTER<strong>0</strong></div>
+<div class="card">CASHIER<strong>0</strong></div>
+<div class="card">PLAYERS<strong>0</strong></div>
+</div>
+</section>
+
+<section id="tree" hidden>
+<h2>شجرة الوكلاء</h2>
+<p>MASTER</p>
+<p>└── SUPER MASTER</p>
+<p>　 └── MASTER</p>
+<p>　　 └── CASHIER</p>
+<button onclick="alert('سيتم تفعيل إنشاء الوكلاء لاحقاً')">إضافة وكيل</button>
+</section>
+
+<section id="players" hidden>
+<h2>إدارة اللاعبين</h2>
+<p>قائمة اللاعبين وطلبات الحسابات</p>
+</section>
+
+<section id="wallet" hidden>
+<h2>إدارة الأرصدة</h2>
+<p>الشحن والسحب وتصحيح الأرصدة</p>
+</section>
+
+<section id="reports" hidden>
+<h2>التقارير</h2>
+<p>العمولات والأرباح وسجل العمليات</p>
+</section>
+
+<section id="settings" hidden>
+<h2>الإعدادات</h2>
+<p>إعدادات لوحة الإدارة</p>
+</section>
+</main>
+
+<footer>BOSS EAGLE MASTER © 2026</footer>
+
+<script>
+function show(id){
+document.querySelectorAll('main section').forEach(s=>s.hidden=true);
+document.getElementById(id).hidden=false;
+}
+</script>
+</body>
+</html>
