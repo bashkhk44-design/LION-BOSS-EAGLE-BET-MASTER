@@ -2,9 +2,9 @@
   "name": "lion-boss-eagle-master",
   "version": "1.0.0",
   "description": "BOSS EAGLE BET MASTER PANEL",
-  "main": "start.js",
+  "main": "index.js",
   "scripts": {
-    "start": "node start.js"
+    "start": "node index.js"
   },
   "dependencies": {
     "express": "^4.21.2",
