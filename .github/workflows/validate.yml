@@ -1,0 +1,25 @@
+name: Validate master panel
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --ignore-scripts
+      - run: npm run check
+      - name: Smoke test server
+        run: |
+          SESSION_SECRET=test-secret PORT=8080 node start.js &
+          PID=$!
+          trap 'kill $PID 2>/dev/null || true' EXIT
+          for i in $(seq 1 20); do
+            if curl -fsS http://127.0.0.1:8080/health; then break; fi
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:8080/api/setup-status
