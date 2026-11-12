@@ -7,14 +7,24 @@ const app = express();
 app.set("trust proxy", 1);
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: "100kb" }));
+app.disable("x-powered-by");
+app.use((req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("Referrer-Policy", "no-referrer");
+  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  if (process.env.NODE_ENV === "production") res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+  next();
+});
 
+if (process.env.NODE_ENV === "production" && (!process.env.SESSION_SECRET || process.env.SESSION_SECRET.length < 32)) { throw new Error("SESSION_SECRET must be set to a random value of at least 32 characters in production."); }
 const sessionSecret = process.env.SESSION_SECRET || crypto.randomBytes(48).toString("hex");
 app.use(session({
   name: "lion.master.sid",
   secret: sessionSecret,
   resave: false,
   saveUninitialized: false,
-  cookie: { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 12 * 60 * 60 * 1000 }
+  cookie: { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 6 * 60 * 60 * 1000 }
 }));
 
 const { initializeMaster } = require("./admin/bootstrap");
@@ -24,7 +34,7 @@ initializeMaster();
 app.use("/api", adminRoutes);
 app.use(express.static(path.join(__dirname, "public"), { index: false }));
 app.get("/", (req, res) => res.sendFile(path.join(__dirname, "public", "index.html")));
-app.get("/health", (req, res) => res.status(200).json({ ok: true, service: "BOSS EAGLE MASTER" }));
+app.get("/health", (req, res) => res.set("Cache-Control", "no-store").status(200).json({ ok: true, service: "BOSS EAGLE MASTER" }));
 
 const PORT = Number(process.env.PORT) || 8080;
 app.listen(PORT, "0.0.0.0", () => console.log("BOSS EAGLE MASTER running on port " + PORT));
