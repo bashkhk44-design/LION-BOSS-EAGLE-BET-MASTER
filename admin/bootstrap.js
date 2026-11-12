@@ -38,15 +38,32 @@ function initializeMaster() {
   const store = readStore();
   const username = process.env.MASTER_USERNAME;
   const password = process.env.MASTER_PASSWORD;
-  if (username && password && !store.users.some(u => u.role === "MASTER" && !u.parentId)) {
+  const rootMaster = store.users.find(u => u.role === "MASTER" && !u.parentId);
+
+  if (username && password) {
+    const normalizedUsername = String(username).trim();
+    if (!/^[a-zA-Z0-9_.-]{4,32}$/.test(normalizedUsername) || String(password).length < 12) {
+      throw new Error("MASTER_USERNAME must be 4-32 valid characters and MASTER_PASSWORD must be at least 12 characters.");
+    }
+    const duplicate = store.users.find(u => u.username.toLowerCase() === normalizedUsername.toLowerCase() && (!rootMaster || u.id !== rootMaster.id));
+    if (duplicate) throw new Error("MASTER_USERNAME is already used by another account.");
     const credentials = hashPassword(password);
-    store.users.push({
-      id: crypto.randomUUID(), username: String(username).trim(), displayName: "MASTER",
-      role: "MASTER", parentId: null, password: credentials, balance: 0,
-      active: true, createdAt: new Date().toISOString()
-    });
-    writeStore(store);
-    console.log("Initial MASTER account created from environment settings.");
+    if (rootMaster) {
+      rootMaster.username = normalizedUsername;
+      rootMaster.password = credentials;
+      rootMaster.active = true;
+      rootMaster.displayName = "MASTER";
+      writeStore(store);
+      console.log("Root MASTER credentials synchronized from hosting environment.");
+    } else {
+      store.users.push({
+        id: crypto.randomUUID(), username: normalizedUsername, displayName: "MASTER",
+        role: "MASTER", parentId: null, password: credentials, balance: 0,
+        active: true, createdAt: new Date().toISOString()
+      });
+      writeStore(store);
+      console.log("Initial MASTER account created from environment settings.");
+    }
   }
   return store;
 }
