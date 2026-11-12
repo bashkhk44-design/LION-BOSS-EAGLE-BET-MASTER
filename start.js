@@ -17,8 +17,12 @@ app.use((req, res, next) => {
   next();
 });
 
-if (process.env.NODE_ENV === "production" && (!process.env.SESSION_SECRET || process.env.SESSION_SECRET.length < 32)) { throw new Error("SESSION_SECRET must be set to a random value of at least 32 characters in production."); }
-const sessionSecret = process.env.SESSION_SECRET || crypto.randomBytes(48).toString("hex");
+if (process.env.NODE_ENV === "production" && (!process.env.SESSION_SECRET || process.env.SESSION_SECRET.length < 32)) {
+  console.warn("WARNING: SESSION_SECRET is missing or too short. A temporary secret will be generated; sessions will not survive a restart. Set SESSION_SECRET in the hosting environment.");
+}
+const sessionSecret = process.env.SESSION_SECRET && process.env.SESSION_SECRET.length >= 32
+  ? process.env.SESSION_SECRET
+  : crypto.randomBytes(48).toString("hex");
 app.use(session({
   name: "lion.master.sid",
   secret: sessionSecret,
