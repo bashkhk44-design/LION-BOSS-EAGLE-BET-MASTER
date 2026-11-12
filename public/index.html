@@ -1,92 +1,74 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>BOSS EAGLE MASTER</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#090909;color:#eee;font-family:Arial}
-header{background:#17130a;border-bottom:2px solid #c99b35;padding:22px;text-align:center}
-header h1{color:#e6b94e;margin:0}
-header p{color:#aaa}
-nav{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:15px}
-nav button,.card{background:#171717;border:1px solid #8e6b24;color:#e6b94e;padding:17px;border-radius:9px;font-size:15px}
-main{padding:15px}
-h2{color:#e6b94e}
-.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-.card{text-align:center}
-.card strong{display:block;font-size:25px;margin-top:12px;color:white}
-section{background:#141414;border:1px solid #333;border-radius:10px;padding:16px;margin:15px 0}
-button{cursor:pointer}
-button:active{background:#3a2b10}
-footer{text-align:center;color:#777;padding:25px}
+:root{color-scheme:dark;--bg:#080808;--panel:#151515;--gold:#e5bd58;--line:#44371c;--muted:#aaa}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#eee;font-family:Arial,sans-serif}
+header{padding:20px;text-align:center;background:#17130a;border-bottom:2px solid var(--gold)}header h1{margin:0;color:var(--gold)}header p{color:var(--muted);margin:8px 0 0}
+nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:12px;max-width:1100px;margin:auto}
+button{cursor:pointer;background:#211b10;border:1px solid #8e6b24;color:var(--gold);padding:12px;border-radius:8px;font-weight:bold}
+button:hover{background:#382b12}button:disabled{opacity:.5;cursor:not-allowed}
+main{max-width:1100px;margin:auto;padding:12px}.panel{background:var(--panel);border:1px solid #333;border-radius:10px;padding:16px;margin:12px 0}
+h2{color:var(--gold);margin-top:0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px}
+.stat,.item{background:#101010;border:1px solid var(--line);padding:14px;border-radius:8px}.stat strong{display:block;font-size:25px;margin-top:9px;color:white}
+input,select{width:100%;padding:12px;margin:6px 0 12px;background:#090909;color:white;border:1px solid #555;border-radius:7px}
+label{display:block;color:#ddd;font-size:14px}.formgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px}
+.list{display:grid;gap:8px}.rowitem{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:#101010;border:1px solid #333;padding:12px;border-radius:8px}
+.muted{color:var(--muted)}.hidden{display:none!important}.danger{color:#ff9b9b}.ok{color:#a8e6a8}#notice{padding:10px;margin:10px 0;border-radius:8px;background:#201b10;display:none}
+#auth{max-width:430px;margin:28px auto}.small{font-size:12px;color:var(--muted)}footer{text-align:center;color:#777;padding:22px}
+@media(max-width:520px){nav{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
 </head>
 <body>
-<header>
-<h1>👑 BOSS EAGLE BET</h1>
-<p>MASTER CONTROL PANEL</p>
-</header>
-
+<header><h1>👑 BOSS EAGLE BET</h1><p>MASTER CONTROL PANEL</p></header>
+<div id="notice" role="status"></div>
+<section id="auth" class="panel">
+<h2 id="authTitle">تسجيل دخول MASTER</h2>
+<form id="authForm">
+<label>اسم المستخدم<input id="username" autocomplete="username" required minlength="4"></label>
+<label>كلمة المرور<input id="password" type="password" autocomplete="current-password" required minlength="10"></label>
+<button id="authSubmit" type="submit">دخول</button>
+</form><p class="small" id="authHint"></p>
+</section>
+<div id="app" class="hidden">
 <nav>
-<button onclick="show('dashboard')">الرئيسية</button>
-<button onclick="show('tree')">شجرة الوكلاء</button>
-<button onclick="show('players')">اللاعبون</button>
-<button onclick="show('wallet')">إدارة الأرصدة</button>
-<button onclick="show('reports')">التقارير</button>
-<button onclick="show('settings')">الإعدادات</button>
+<button data-page="dashboard">الرئيسية</button><button data-page="agents">إدارة الوكلاء</button><button data-page="players">اللاعبون</button><button data-page="wallet">إدارة الأرصدة</button><button data-page="transactions">سجل العمليات</button><button data-page="reports">التقارير</button><button id="logout">تسجيل الخروج</button>
 </nav>
-
 <main>
-<section id="dashboard">
-<h2>لوحة المعلومات الرئيسية</h2>
-<div class="cards">
-<div class="card">SUPER MASTER<strong>0</strong></div>
-<div class="card">MASTER<strong>0</strong></div>
-<div class="card">CASHIER<strong>0</strong></div>
-<div class="card">PLAYERS<strong>0</strong></div>
-</div>
-</section>
-
-<section id="tree" hidden>
-<h2>شجرة الوكلاء</h2>
-<p>MASTER</p>
-<p>└── SUPER MASTER</p>
-<p>　 └── MASTER</p>
-<p>　　 └── CASHIER</p>
-<button onclick="alert('سيتم تفعيل إنشاء الوكلاء لاحقاً')">إضافة وكيل</button>
-</section>
-
-<section id="players" hidden>
-<h2>إدارة اللاعبين</h2>
-<p>قائمة اللاعبين وطلبات الحسابات</p>
-</section>
-
-<section id="wallet" hidden>
-<h2>إدارة الأرصدة</h2>
-<p>الشحن والسحب وتصحيح الأرصدة</p>
-</section>
-
-<section id="reports" hidden>
-<h2>التقارير</h2>
-<p>العمولات والأرباح وسجل العمليات</p>
-</section>
-
-<section id="settings" hidden>
-<h2>الإعدادات</h2>
-<p>إعدادات لوحة الإدارة</p>
-</section>
-</main>
-
+<section id="dashboard" class="panel page"><h2>لوحة المعلومات الرئيسية</h2><div class="grid" id="stats"></div></section>
+<section id="agents" class="panel page hidden"><h2>إدارة الوكلاء</h2><div class="panel"><h3>إنشاء وكيل جديد</h3><form id="agentForm" class="formgrid">
+<label>الاسم الظاهر<input name="displayName" required></label><label>اسم الدخول<input name="username" required minlength="4"></label><label>كلمة المرور<input name="password" type="password" required minlength="10"></label>
+<label>نوع الحساب<select name="role"><option value="SUPER_MASTER">SUPER MASTER</option><option value="MASTER">MASTER</option><option value="CASHIER">CASHIER</option></select></label>
+<button type="submit">إنشاء الوكيل</button></form><p class="small">إنشاء الوكلاء متاح للـ MASTER الرئيسي فقط.</p></div><div id="agentsList" class="list"></div></section>
+<section id="players" class="panel page hidden"><h2>إدارة اللاعبين</h2><form id="playerForm" class="formgrid"><label>اسم اللاعب<input name="username" required minlength="3"></label><label>الاسم الظاهر<input name="displayName"></label><button type="submit">إضافة لاعب</button></form><div id="playersList" class="list"></div></section>
+<section id="wallet" class="panel page hidden"><h2>إدارة الأرصدة</h2><form id="walletForm" class="formgrid"><label>اللاعب<select name="playerId" id="walletPlayer" required></select></label><label>المبلغ (+ شحن / - خصم)<input name="amount" type="number" step="0.01" required></label><label>ملاحظة<input name="note"></label><button type="submit">حفظ العملية</button></form></section>
+<section id="transactions" class="panel page hidden"><h2>سجل العمليات</h2><div id="transactionsList" class="list"></div></section>
+<section id="reports" class="panel page hidden"><h2>التقارير</h2><div id="reportStats" class="grid"></div></section>
+</main></div>
 <footer>BOSS EAGLE MASTER © 2026</footer>
-
 <script>
-function show(id){
-document.querySelectorAll('main section').forEach(s=>s.hidden=true);
-document.getElementById(id).hidden=false;
-}
+const $=s=>document.querySelector(s);
+let currentUser=null, players=[];
+function notice(message,ok=false){const n=$("#notice");n.textContent=message;n.className=ok?"ok":"danger";n.style.display="block";}
+async function api(url,options={}){const response=await fetch("/api"+url,{credentials:"same-origin",headers:{"Content-Type":"application/json",...(options.headers||{})},...options});let data={};try{data=await response.json()}catch{}if(!response.ok)throw new Error(data.message||"حدث خطأ في الاتصال");return data;}
+function showPage(id){document.querySelectorAll(".page").forEach(x=>x.classList.add("hidden"));$("#"+id).classList.remove("hidden");}
+function stat(label,value){return '<div class="stat">'+label+'<strong>'+Number(value||0).toLocaleString("en-US")+'</strong></div>';}
+async function checkSetup(){const s=await api("/setup-status");if(s.needsSetup){$("#authTitle").textContent="إنشاء حساب MASTER الرئيسي";$("#authSubmit").textContent="إنشاء الحساب";$("#authHint").textContent="أنشئ الحساب الرئيسي أولاً. لا يمكن إنشاء MASTER رئيسي آخر بعد ذلك."}else{$("#authTitle").textContent="تسجيل دخول MASTER";$("#authSubmit").textContent="دخول";$("#authHint").textContent=""}return s.needsSetup;}
+$("#authForm").addEventListener("submit",async e=>{e.preventDefault();try{const setup=await checkSetup();const data=await api(setup?"/setup-master":"/auth/login",{method:"POST",body:JSON.stringify({username:$("#username").value,password:$("#password").value})});currentUser=data.user;$("#auth").classList.add("hidden");$("#app").classList.remove("hidden");notice("تم تسجيل الدخول بنجاح",true);await refreshAll();}catch(err){notice(err.message)}});
+async function refreshAll(){const me=await api("/auth/me");currentUser=me.user;const d=await api("/dashboard");$("#stats").innerHTML=stat("SUPER MASTER",d.stats.superMasters)+stat("MASTER",d.stats.masters)+stat("CASHIER",d.stats.cashiers)+stat("PLAYERS",d.stats.players)+stat("إجمالي أرصدة اللاعبين",d.stats.totalBalances);const master=currentUser.role==="MASTER"&&!currentUser.parentId;document.querySelector('[data-page="agents"]').classList.toggle("hidden",!master);document.querySelector('[data-page="wallet"]').classList.toggle("hidden",!master);document.querySelector('[data-page="transactions"]').classList.toggle("hidden",!master);document.querySelector('[data-page="reports"]').classList.toggle("hidden",!master);$("#agentForm").classList.toggle("hidden",!master);$("#playerForm").classList.toggle("hidden",!master);await loadPlayers();if(master){await loadAgents();await loadTransactions();await loadReports();}showPage("dashboard");}
+async function loadAgents(){const d=await api("/agents");$("#agentsList").innerHTML=d.agents.map(a=>'<div class="rowitem"><span><b>'+escapeHtml(a.displayName)+'</b> · '+escapeHtml(a.role)+'<br><small>'+escapeHtml(a.username)+' · '+(a.active?"نشط":"موقوف")+'</small></span><button data-toggle="'+a.id+'" data-active="'+(!a.active)+'">'+(a.active?"إيقاف":"تفعيل")+'</button></div>').join("")||'<p class="muted">لا يوجد وكلاء بعد.</p>';}
+async function loadPlayers(){const d=await api("/players");players=d.players;$("#playersList").innerHTML=players.map(p=>'<div class="rowitem"><span><b>'+escapeHtml(p.displayName)+'</b><br><small>'+escapeHtml(p.username)+' · الرصيد: '+Number(p.balance).toLocaleString("en-US")+'</small></span></div>').join("")||'<p class="muted">لا يوجد لاعبون.</p>';$("#walletPlayer").innerHTML=players.map(p=>'<option value="'+p.id+'">'+escapeHtml(p.username)+'</option>').join("");}
+async function loadTransactions(){const d=await api("/transactions");$("#transactionsList").innerHTML=d.transactions.map(t=>'<div class="rowitem"><span>'+escapeHtml(t.username)+' · '+escapeHtml(t.note||"عملية رصيد")+'<br><small>'+new Date(t.createdAt).toLocaleString()+'</small></span><b class="'+(t.amount>0?"ok":"danger")+'">'+(t.amount>0?"+":"")+Number(t.amount).toLocaleString("en-US")+'</b></div>').join("")||'<p class="muted">لا توجد عمليات.</p>';}
+async function loadReports(){const d=await api("/reports");$("#reportStats").innerHTML=stat("عدد العمليات",d.report.count)+stat("إجمالي الشحن",d.report.credits)+stat("إجمالي الخصم",d.report.debits);}
+function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+$("#agentForm").addEventListener("submit",async e=>{e.preventDefault();const f=new FormData(e.currentTarget);try{await api("/agents",{method:"POST",body:JSON.stringify(Object.fromEntries(f))});e.currentTarget.reset();notice("تم إنشاء الوكيل بنجاح",true);await loadAgents();}catch(err){notice(err.message)}});
+$("#playerForm").addEventListener("submit",async e=>{e.preventDefault();try{await api("/players",{method:"POST",body:JSON.stringify(Object.fromEntries(new FormData(e.currentTarget)))});e.currentTarget.reset();notice("تمت إضافة اللاعب",true);await loadPlayers();}catch(err){notice(err.message)}});
+$("#walletForm").addEventListener("submit",async e=>{e.preventDefault();try{await api("/wallet/adjust",{method:"POST",body:JSON.stringify(Object.fromEntries(new FormData(e.currentTarget)))});e.currentTarget.reset();notice("تم تحديث الرصيد وتسجيل العملية",true);await loadPlayers();await loadTransactions();await loadReports();}catch(err){notice(err.message)}});
+$("#agentsList").addEventListener("click",async e=>{const b=e.target.closest("[data-toggle]");if(!b)return;try{await api("/agents/"+b.dataset.toggle+"/status",{method:"PATCH",body:JSON.stringify({active:b.dataset.active==="true"})});await loadAgents();notice("تم تحديث حالة الوكيل",true)}catch(err){notice(err.message)}});
+document.querySelectorAll("[data-page]").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
+$("#logout").addEventListener("click",async()=>{try{await api("/auth/logout",{method:"POST"});}finally{location.reload()}});
+(async()=>{try{const setup=await checkSetup();if(!setup){try{const d=await api("/auth/me");currentUser=d.user;$("#auth").classList.add("hidden");$("#app").classList.remove("hidden");await refreshAll()}catch{}}}catch(e){notice(e.message)}})();
 </script>
-</body>
-</html>
+</body></html>
