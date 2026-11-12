@@ -19,6 +19,7 @@ function limitLogin(req, res, next) {
   if (!entry || now - entry.startedAt > 15 * 60 * 1000) entry = { startedAt: now, count: 0 };
   entry.count += 1;
   loginAttempts.set(key, entry);
+  res.on("finish", () => { if (res.statusCode < 400) loginAttempts.delete(key); });
   if (loginAttempts.size > 5000) {
     for (const [k, v] of loginAttempts) if (now - v.startedAt > 15 * 60 * 1000) loginAttempts.delete(k);
   }
@@ -62,7 +63,7 @@ router.get("/setup-status", (req, res) => {
   const db = readStore();
   res.json({ ok: true, needsSetup: !db.users.some(u => u.role === "MASTER" && !u.parentId), setupEnabled: Boolean(process.env.MASTER_SETUP_KEY) });
 });
-router.post("/setup-master", (req, res) => {
+router.post("/setup-master", limitLogin, (req, res) => {
   const db = readStore();
   if (db.users.some(u => u.role === "MASTER" && !u.parentId)) return fail(res, 409, "تم إنشاء حساب MASTER مسبقاً.");
   if (!process.env.MASTER_SETUP_KEY || clean(req.body.setupKey) !== process.env.MASTER_SETUP_KEY) return fail(res, 403, "رمز التأسيس غير صحيح. أضف MASTER_SETUP_KEY في إعدادات الاستضافة.");
