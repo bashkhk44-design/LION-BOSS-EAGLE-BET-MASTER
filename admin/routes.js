@@ -11,6 +11,52 @@ const safeUser = user => ({
   active: user.active !== false, createdAt: user.createdAt
 });
 const fail = (res, status, message) => res.status(status).json({ ok: false, message });
+const loginAttempts = new Map();
+function limitLogin(req, res, next) {
+  const key = String(req.ip || "unknown") + ":" + clean(req.body.username).toLowerCase();
+  const now = Date.now();
+  let entry = loginAttempts.get(key);
+  if (!entry || now - entry.startedAt > 15 * 60 * 1000) entry = { startedAt: now, count: 0 };
+  entry.count += 1;
+  loginAttempts.set(key, entry);
+  if (loginAttempts.size > 5000) {
+    for (const [k, v] of loginAttempts) if (now - v.startedAt > 15 * 60 * 1000) loginAttempts.delete(k);
+  }
+  if (entry.count > 8) return fail(res, 429, "محاولات كثيرة. انتظر 15 دقيقة ثم حاول مجدداً.");
+  next();
+}
+function rotateSession(req, userId, res, status = 200) {
+  req.session.regenerate(err => {
+    if (err) return fail(res, 500, "تعذر إنشاء جلسة آمنة. حاول مجدداً.");
+    const csrfToken = crypto.randomBytes(32).toString("hex");
+    req.session.userId = userId;
+    req.session.csrfToken = csrfToken;
+    req.session.save(saveError => {
+      if (saveError) return fail(res, 500, "تعذر حفظ جلسة الدخول.");
+      const db = readStore();
+      const user = db.users.find(u => u.id === userId);
+      return res.status(status).json({ ok: true, user: safeUser(user), csrfToken });
+    });
+  });
+}
+router.get("/csrf-token", (req, res) => {
+  if (!req.session.csrfToken) req.session.csrfToken = crypto.randomBytes(32).toString("hex");
+  req.session.save(err => {
+    if (err) return fail(res, 500, "تعذر تهيئة جلسة الحماية.");
+    res.set("Cache-Control", "no-store");
+    res.json({ ok: true, csrfToken: req.session.csrfToken });
+  });
+});
+router.use((req, res, next) => {
+  if (["POST", "PUT", "PATCH", "DELETE"].includes(req.method)) {
+    const supplied = req.get("X-CSRF-Token") || "";
+    const expected = req.session && req.session.csrfToken || "";
+    if (!expected || supplied.length !== expected.length || !crypto.timingSafeEqual(Buffer.from(supplied), Buffer.from(expected))) {
+      return fail(res, 403, "انتهت جلسة الحماية. حدّث الصفحة ثم حاول مجدداً.");
+    }
+  }
+  next();
+});
 
 router.get("/setup-status", (req, res) => {
   const db = readStore();
@@ -27,19 +73,17 @@ router.post("/setup-master", (req, res) => {
   const credentials = hashPassword(password);
   const user = { id: crypto.randomUUID(), username, displayName: "MASTER", role: "MASTER", parentId: null, password: credentials, balance: 0, active: true, createdAt: new Date().toISOString() };
   db.users.push(user); writeStore(db);
-  req.session.userId = user.id;
-  res.status(201).json({ ok: true, user: safeUser(user) });
+  rotateSession(req, user.id, res, 201);
 });
-router.post("/auth/login", (req, res) => {
+router.post("/auth/login", limitLogin, (req, res) => {
   const username = clean(req.body.username);
   const password = String(req.body.password || "");
   const db = readStore();
   const user = db.users.find(u => u.username.toLowerCase() === username.toLowerCase());
   if (!user || user.active === false || !verifyPassword(password, user.password)) return fail(res, 401, "بيانات الدخول غير صحيحة أو الحساب موقوف.");
-  req.session.userId = user.id;
-  res.json({ ok: true, user: safeUser(user) });
+  rotateSession(req, user.id, res);
 });
-router.post("/auth/logout", (req, res) => req.session.destroy(() => res.json({ ok: true })));
+router.post("/auth/logout", (req, res) => req.session.destroy(err => err ? fail(res, 500, "تعذر إنهاء الجلسة.") : res.clearCookie("lion.master.sid", { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production" }).json({ ok: true })));
 function requireAuth(req, res, next) {
   const db = readStore();
   const user = db.users.find(u => u.id === req.session.userId && u.active !== false);
