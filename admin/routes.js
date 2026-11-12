@@ -14,11 +14,12 @@ const fail = (res, status, message) => res.status(status).json({ ok: false, mess
 
 router.get("/setup-status", (req, res) => {
   const db = readStore();
-  res.json({ ok: true, needsSetup: !db.users.some(u => u.role === "MASTER" && !u.parentId) });
+  res.json({ ok: true, needsSetup: !db.users.some(u => u.role === "MASTER" && !u.parentId), setupEnabled: Boolean(process.env.MASTER_SETUP_KEY) });
 });
 router.post("/setup-master", (req, res) => {
   const db = readStore();
   if (db.users.some(u => u.role === "MASTER" && !u.parentId)) return fail(res, 409, "تم إنشاء حساب MASTER مسبقاً.");
+  if (!process.env.MASTER_SETUP_KEY || clean(req.body.setupKey) !== process.env.MASTER_SETUP_KEY) return fail(res, 403, "رمز التأسيس غير صحيح. أضف MASTER_SETUP_KEY في إعدادات الاستضافة.");
   const username = clean(req.body.username);
   const password = String(req.body.password || "");
   if (!/^[a-zA-Z0-9_.-]{4,32}$/.test(username)) return fail(res, 400, "اسم المستخدم يجب أن يكون 4 إلى 32 حرفاً أو رقماً.");
