@@ -3,7 +3,7 @@
   "version": "1.1.0",
   "description": "BOSS EAGLE BET MASTER PANEL",
   "main": "start.js",
-  "scripts": { "start": "node start.js", "check": "node --check start.js && node --check admin/bootstrap.js && node --check admin/routes.js" },
+  "scripts": { "start": "node start.js", "check": "node --check start.js && node --check admin/bootstrap.js && node --check admin/routes.js && node -e \"const fs=require(\u0027fs\u0027),vm=require(\u0027vm\u0027),h=fs.readFileSync(\u0027public/index.html\u0027,\u0027utf8\u0027),m=h.match(/<script>([\\s\\S]*?)<\\/script>/);if(!m)throw Error(\u0027Inline script missing\u0027);new vm.Script(m[1]);\"" },
   "dependencies": { "express": "^4.21.2", "express-session": "^1.18.1" },
   "engines": { "node": ">=18" }
 }
