@@ -17,7 +17,7 @@ app.use(session({
   cookie: { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 12 * 60 * 60 * 1000 }
 }));
 
-const initializeMaster = require("./admin/bootstrap");
+const { initializeMaster } = require("./admin/bootstrap");
 const adminRoutes = require("./admin/routes");
 initializeMaster();
 
